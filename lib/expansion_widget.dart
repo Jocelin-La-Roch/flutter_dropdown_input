@@ -1,49 +1,5 @@
-library dropdown_input;
-
 import 'package:flutter/material.dart';
-
-
-class DropdownInput extends StatefulWidget {
-  const DropdownInput({super.key});
-
-  @override
-  State<DropdownInput> createState() => _DropdownInputState();
-}
-
-class _DropdownInputState extends State<DropdownInput>{
-
-  bool isExpanded = false;
-  _up(bool? expanded) {
-    setState(() => isExpanded = expanded!);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: Column(
-        children: [
-          ExpansionWidget(
-            title: const Text("OK"),
-            listOptionsHeight: 100.0,
-            onItemSelected: (item) {
-              print(item);
-            },
-            children: const [
-              ListTile(title: Text("ok 1"),),
-              ListTile(title: Text("ok 2"),),
-              ListTile(title: Text("ok 3"),)
-            ],
-          ),
-          IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-          )
-        ],
-      ),
-    );
-  }
-}
+import 'expansion_widget.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -70,9 +26,7 @@ class ExpansionWidget extends StatefulWidget {
   final ShapeBorder? collapsedShape;
   final Clip? clipBehavior;
   final ListTileControlAffinity? controlAffinity;
-  final double listOptionsHeight;
-  final ValueChanged<Map<String, dynamic>>? onItemSelected;
-  // final bool isExpanded;
+  final bool isExpanded;
 
   const ExpansionWidget({
     super.key,
@@ -98,9 +52,7 @@ class ExpansionWidget extends StatefulWidget {
     this.collapsedShape,
     this.clipBehavior,
     this.controlAffinity,
-    // required this.isExpanded,
-    required this.listOptionsHeight,
-    this.onItemSelected
+    required this.isExpanded
   }) : assert (
   expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
   'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -131,68 +83,6 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
 
   bool _isExpanded = false;
 
-  TextEditingController textEditingController = TextEditingController();
-
-  List<Map<String, dynamic>> optionsList = [
-    {
-      "name": "jojo",
-      "id": "1"
-    },
-    {
-      "name": "jocelin",
-      "id": "2"
-    },
-    {
-      "name": "laroch",
-      "id": "3"
-    },
-    {
-      "name": "linda",
-      "id": "4"
-    }
-  ];
-
-  List<Map<String, dynamic>> optionsListFiltered = [
-    {
-      "name": "jojo",
-      "id": "1"
-    },
-    {
-      "name": "jocelin",
-      "id": "2"
-    },
-    {
-      "name": "laroch",
-      "id": "3"
-    },
-    {
-      "name": "linda",
-      "id": "4"
-    }
-  ];
-
-  List<Widget> optionListWidget() {
-    if(textEditingController.text != "") {
-      return optionsListFiltered.map((e) => ListTile(title: Text(e["name"]),)).toList();
-    } else {
-      return [
-        const ListTile(title: Text("No result"),)
-      ];
-    }
-  }
-
-  void setOptionListWidget () {
-    List<Map<String, dynamic>> temp = [];
-    for (var element in optionsList) {
-      if(element["name"].toString().contains(textEditingController.text)) {
-        temp.add(element);
-      }
-    }
-    setState(() {
-      optionsListFiltered = temp;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -204,11 +94,10 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    if (_isExpanded) {
+    _isExpanded = widget.isExpanded;
+    if (widget.isExpanded) {
       _controller.value = 1.0;
     }
-
-    textEditingController.addListener(setOptionListWidget);
   }
 
   @override
@@ -217,7 +106,7 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
     super.dispose();
   }
 
-  void _handleTap() {
+  void handleTap() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -290,14 +179,11 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
             iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
             textColor: _headerColor.value,
             child: ListTile(
-              onTap: _handleTap,
+              onTap: handleTap,
               // onTap: () {},
               contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
               leading: widget.leading ?? _buildLeadingIcon(context),
-              // title: widget.title,
-              title: TextFormField(
-                controller: textEditingController,
-              ),
+              title: widget.title,
               subtitle: widget.subtitle,
               trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
@@ -351,7 +237,7 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool closed = !widget.isExpanded && _controller.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;
 
     final Widget result = Offstage(
@@ -360,30 +246,10 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
         enabled: !closed,
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-          child: SizedBox(
-            height: 100.0,
-            child: optionsListFiltered.isNotEmpty ?
-            ListView.builder(
-              itemCount: optionsListFiltered.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(optionsListFiltered[index]["name"]),
-                  onTap: () {
-                    textEditingController.text = optionsListFiltered[index]["name"];
-                    _handleTap();
-                    widget.onItemSelected?.call(optionsListFiltered[index]);
-                  },
-                );
-              },
-              // children: widget.children,
-              //children: optionsListFiltered.map((e) => ListTile(title: Text(e["name"]),)).toList(),
-            ) :
-            const ListTile(title: Text("No result"),),
-          ),
-          /*child: Column(
+          child: Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
             children: widget.children,
-          ),*/
+          ),
         ),
       ),
     );
