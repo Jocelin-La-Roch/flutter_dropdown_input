@@ -13,9 +13,6 @@ class DropdownInput extends StatefulWidget {
 class _DropdownInputState extends State<DropdownInput>{
 
   bool isExpanded = false;
-  _up(bool? expanded) {
-    setState(() => isExpanded = expanded!);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,15 +179,33 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
   }
 
   void setOptionListWidget () {
-    List<Map<String, dynamic>> temp = [];
-    for (var element in optionsList) {
-      if(element["name"].toString().contains(textEditingController.text)) {
-        temp.add(element);
+    if (textEditingController.text != "") {
+      setState(() {
+        _isExpanded = true;
+        _controller.forward();
+      });
+      List<Map<String, dynamic>> temp = [];
+      for (var element in optionsList) {
+        if(element["name"].toString().contains(textEditingController.text)) {
+          temp.add(element);
+        }
       }
+      setState(() {
+        optionsListFiltered = temp;
+      });
+    } else {
+      setState(() {
+        _isExpanded = false;
+        _controller.reverse().then<void>((void value) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            // Rebuild without widget.children.
+          });
+        });
+      });
     }
-    setState(() {
-      optionsListFiltered = temp;
-    });
   }
 
   @override
@@ -251,7 +266,15 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
   Widget? _buildIcon(BuildContext context) {
     return RotationTransition(
       turns: _iconTurns,
-      child: const Icon(Icons.expand_more),
+      child: IconButton(
+        onPressed: () {
+          setState(() {
+            optionsListFiltered = optionsList;
+          });
+          _handleTap();
+        },
+        icon: const Icon(Icons.expand_more),
+      ),
     );
   }
 
@@ -290,13 +313,21 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
             iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
             textColor: _headerColor.value,
             child: ListTile(
-              onTap: _handleTap,
-              // onTap: () {},
+              // onTap: _handleTap,
               contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
               leading: widget.leading ?? _buildLeadingIcon(context),
               // title: widget.title,
               title: TextFormField(
                 controller: textEditingController,
+                decoration: InputDecoration(
+                    hintText: "Search",
+                    suffixIcon: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: (){
+                          textEditingController.text = "";
+                        }
+                    )
+                ),
               ),
               subtitle: widget.subtitle,
               trailing: widget.trailing ?? _buildTrailingIcon(context),
