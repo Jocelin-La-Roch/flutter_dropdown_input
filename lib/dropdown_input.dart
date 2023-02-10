@@ -4,7 +4,36 @@ import 'package:flutter/material.dart';
 
 
 class DropdownInput extends StatefulWidget {
-  const DropdownInput({super.key});
+
+  final double listOptionsHeight;
+  final ValueChanged<Map<String, dynamic>>? onItemSelected;
+  final MaterialColor themeColor;
+  final Color titleColor;
+  final double titleSize;
+  final Color inputColor;
+  final double inputSize;
+  final String hintText;
+  final String noResultText;
+  final double clearIconSize;
+  final double dropdownIconSize;
+  final List<Map<String, dynamic>> optionsList;
+  final String filterField;
+
+  const DropdownInput({
+    super.key,
+    this.listOptionsHeight = 100.0,
+    this.onItemSelected,
+    this.themeColor = Colors.blue,
+    this.titleColor = Colors.black,
+    this.titleSize = 16.0,
+    this.inputColor = Colors.black,
+    this.inputSize = 16.0,
+    this.hintText = "Search",
+    this.noResultText = "No result",
+    this.clearIconSize = 32.0,
+    this.dropdownIconSize = 32.0,
+    required this.optionsList,
+    required this.filterField,});
 
   @override
   State<DropdownInput> createState() => _DropdownInputState();
@@ -16,28 +45,19 @@ class _DropdownInputState extends State<DropdownInput>{
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: Column(
-        children: [
-          ExpansionWidget(
-            title: const Text("OK"),
-            listOptionsHeight: 100.0,
-            onItemSelected: (item) {
-              print(item);
-            },
-            children: const [
-              ListTile(title: Text("ok 1"),),
-              ListTile(title: Text("ok 2"),),
-              ListTile(title: Text("ok 3"),)
-            ],
-          ),
-          IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.add),
-          )
-        ],
-      ),
+    return ExpansionWidget(
+      listOptionsHeight: widget.listOptionsHeight,
+      onItemSelected: widget.onItemSelected,
+      themeColor: widget.themeColor,
+      titleColor: widget.titleColor,
+      inputColor: widget.inputColor,
+      inputSize: widget.inputSize,
+      hintText: widget.hintText,
+      noResultText: widget.noResultText,
+      clearIconSize: widget.clearIconSize,
+      dropdownIconSize: widget.dropdownIconSize,
+      optionsList: widget.optionsList,
+      filterField: widget.filterField,
     );
   }
 }
@@ -46,7 +66,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 
 class ExpansionWidget extends StatefulWidget {
   final Widget? leading;
-  final Widget title;
+  // final Widget title;
   final Widget? subtitle;
   final ValueChanged<bool>? onExpansionChanged;
   final List<Widget> children;
@@ -69,12 +89,23 @@ class ExpansionWidget extends StatefulWidget {
   final ListTileControlAffinity? controlAffinity;
   final double listOptionsHeight;
   final ValueChanged<Map<String, dynamic>>? onItemSelected;
+  final MaterialColor themeColor;
+  final Color titleColor;
+  final double titleSize;
+  final Color inputColor;
+  final double inputSize;
+  final String hintText;
+  final String noResultText;
+  final double clearIconSize;
+  final double dropdownIconSize;
+  final List<Map<String, dynamic>> optionsList;
+  final String filterField;
   // final bool isExpanded;
 
   const ExpansionWidget({
     super.key,
     this.leading,
-    required this.title,
+    // required this.title,
     this.subtitle,
     this.onExpansionChanged,
     this.children = const <Widget>[],
@@ -96,8 +127,19 @@ class ExpansionWidget extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
     // required this.isExpanded,
-    required this.listOptionsHeight,
-    this.onItemSelected
+    this.listOptionsHeight = 100.0,
+    this.onItemSelected,
+    this.themeColor = Colors.blue,
+    this.titleColor = Colors.black,
+    this.titleSize = 16.0,
+    this.inputColor = Colors.black,
+    this.inputSize = 16.0,
+    this.hintText = "Search",
+    this.noResultText = "No result",
+    this.clearIconSize = 32.0,
+    this.dropdownIconSize = 32.0,
+    required this.optionsList,
+    required this.filterField,
   }) : assert (
   expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
   'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -130,43 +172,9 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
 
   TextEditingController textEditingController = TextEditingController();
 
-  List<Map<String, dynamic>> optionsList = [
-    {
-      "name": "jojo",
-      "id": "1"
-    },
-    {
-      "name": "jocelin",
-      "id": "2"
-    },
-    {
-      "name": "laroch",
-      "id": "3"
-    },
-    {
-      "name": "linda",
-      "id": "4"
-    }
-  ];
+  List<Map<String, dynamic>> optionsList = [];
 
-  List<Map<String, dynamic>> optionsListFiltered = [
-    {
-      "name": "jojo",
-      "id": "1"
-    },
-    {
-      "name": "jocelin",
-      "id": "2"
-    },
-    {
-      "name": "laroch",
-      "id": "3"
-    },
-    {
-      "name": "linda",
-      "id": "4"
-    }
-  ];
+  List<Map<String, dynamic>> optionsListFiltered = [];
 
   List<Widget> optionListWidget() {
     if(textEditingController.text != "") {
@@ -186,8 +194,10 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
       });
       List<Map<String, dynamic>> temp = [];
       for (var element in optionsList) {
-        if(element["name"].toString().contains(textEditingController.text)) {
-          temp.add(element);
+        if (element[widget.filterField] != null) {
+          if(element[widget.filterField].toString().contains(textEditingController.text)) {
+            temp.add(element);
+          }
         }
       }
       setState(() {
@@ -218,6 +228,9 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
     _headerColor = _controller.drive(_headerColorTween.chain(_easeInTween));
     _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
+
+    optionsList = widget.optionsList;
+    optionsListFiltered = widget.optionsList;
 
     if (_isExpanded) {
       _controller.value = 1.0;
@@ -273,7 +286,7 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
           });
           _handleTap();
         },
-        icon: const Icon(Icons.expand_more),
+        icon: Icon(Icons.expand_more, color: widget.themeColor, size: widget.dropdownIconSize,),
       ),
     );
   }
@@ -319,14 +332,19 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
               // title: widget.title,
               title: TextFormField(
                 controller: textEditingController,
+                cursorColor: widget.themeColor,
+                style: TextStyle(color: widget.inputColor, fontSize: widget.inputSize),
                 decoration: InputDecoration(
-                    hintText: "Search",
-                    suffixIcon: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: (){
-                          textEditingController.text = "";
-                        }
-                    )
+                  hintText: widget.hintText,
+                  hintStyle: TextStyle(
+                    fontSize: widget.inputSize
+                  ),
+                  suffixIcon: IconButton(
+                      icon: Icon(Icons.close, size: widget.clearIconSize,),
+                      onPressed: (){
+                        textEditingController.text = "";
+                      }
+                  ),
                 ),
               ),
               subtitle: widget.subtitle,
@@ -392,24 +410,29 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
           child: SizedBox(
-            height: 100.0,
+            height: widget.listOptionsHeight,
             child: optionsListFiltered.isNotEmpty ?
-            ListView.builder(
-              itemCount: optionsListFiltered.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(optionsListFiltered[index]["name"]),
-                  onTap: () {
-                    textEditingController.text = optionsListFiltered[index]["name"];
-                    _handleTap();
-                    widget.onItemSelected?.call(optionsListFiltered[index]);
-                  },
-                );
-              },
-              // children: widget.children,
-              //children: optionsListFiltered.map((e) => ListTile(title: Text(e["name"]),)).toList(),
+            RawScrollbar(
+              thumbColor: widget.themeColor,
+              radius: const Radius.circular(5.0),
+              thickness: 4.0,
+              child: ListView.builder(
+                itemCount: optionsListFiltered.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(optionsListFiltered[index]["name"], style: TextStyle(color: widget.titleColor, fontSize: widget.titleSize),),
+                    onTap: () {
+                      textEditingController.text = optionsListFiltered[index]["name"];
+                      _handleTap();
+                      widget.onItemSelected?.call(optionsListFiltered[index]);
+                    },
+                  );
+                },
+                // children: widget.children,
+                //children: optionsListFiltered.map((e) => ListTile(title: Text(e["name"]),)).toList(),
+              ),
             ) :
-            const ListTile(title: Text("No result"),),
+            ListTile(title: Text(widget.noResultText, style: TextStyle(color: widget.titleColor, fontSize: widget.titleSize),)),
           ),
           /*child: Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
@@ -419,10 +442,13 @@ class _ExpansionWidgetState extends State<ExpansionWidget> with SingleTickerProv
       ),
     );
 
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: _buildChildren,
-      child: shouldRemoveChildren ? null : result,
+    return Theme(
+      data: ThemeData(primarySwatch: widget.themeColor),
+      child: AnimatedBuilder(
+        animation: _controller.view,
+        builder: _buildChildren,
+        child: shouldRemoveChildren ? null : result,
+      ),
     );
   }
 }

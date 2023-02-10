@@ -28,6 +28,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<Map<String, dynamic>> optionsList = [
+    {
+      "name": "jojo",
+      "id": "1"
+    },
+    {
+      "name": "jocelin",
+      "id": "2"
+    },
+    {
+      "name": "laroch",
+      "id": "3"
+    },
+    {
+      "name": "linda",
+      "id": "4"
+    }
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,8 +54,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          Center(
-            child: DropdownInput(),
+          DropdownInput(
+            optionsList: optionsList,
+            filterField: "name",
+            onItemSelected: (item) {
+              print(item);
+            },
           ),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
