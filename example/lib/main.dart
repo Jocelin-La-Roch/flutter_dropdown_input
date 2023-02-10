@@ -30,19 +30,19 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> optionsList = [
     {
-      "name": "jojo",
+      "name": "grey",
       "id": "1"
     },
     {
-      "name": "jocelin",
+      "name": "green",
       "id": "2"
     },
     {
-      "name": "laroch",
+      "name": "red",
       "id": "3"
     },
     {
-      "name": "linda",
+      "name": "orange",
       "id": "4"
     }
   ];

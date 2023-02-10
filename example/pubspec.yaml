@@ -1,5 +1,6 @@
 name: example
 description: A new Flutter project.
+homepage: https://github.com/Jocelin-La-Roch/flutter_dropdown_input.git
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
